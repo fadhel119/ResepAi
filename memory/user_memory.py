@@ -11,6 +11,7 @@ class UserMemory:
             "alergi": [],
             "masakan_favorit": []
         }
+        self.riwayat_judul = []  # daftar judul resep yang pernah dicari
 
     def update_preference(self, key, value):
         """Update satu preferensi pengguna"""
@@ -64,3 +65,12 @@ class UserMemory:
             role = "Kamu" if msg.type == "human" else "Asisten"
             result.append(f"{role}: {msg.content}")
         return "\n".join(result)
+
+    def add_riwayat_judul(self, nama_resep: str):
+        """Tambahkan judul resep ke riwayat singkat"""
+        if nama_resep:
+            self.riwayat_judul.append(nama_resep)
+
+    def get_riwayat_judul(self) -> list:
+        """Ambil daftar judul resep yang pernah dicari"""
+        return self.riwayat_judul

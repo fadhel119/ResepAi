@@ -6,7 +6,6 @@ from langchain_classic.chains import LLMChain
 
 load_dotenv()
 
-print("DEBUG GROQ:", os.getenv("GROQ_API_KEY"))
 
 def build_extract_chain() -> LLMChain:
     llm = ChatOpenAI(

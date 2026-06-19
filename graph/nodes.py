@@ -10,11 +10,22 @@ recipe_chain = build_recipe_chain()
 steps_chain = build_steps_chain()
 
 
-def _parse_json_safe(text: str) -> dict | list:
-    """Helper: bersihkan teks dan parse JSON dengan aman"""
-    # Hapus markdown code block jika ada
-    text = re.sub(r"```json|```", "", text).strip()
-    return json.loads(text)
+import urllib.parse
+
+def _parse_json_safe(json_str: str):
+    """Parse JSON string safely, removing markdown code blocks if present"""
+    try:
+        # Remove markdown code blocks if present
+        cleaned = re.sub(r'```(?:json)?\s*\n?', '', json_str).strip()
+        return json.loads(cleaned)
+    except (json.JSONDecodeError, ValueError):
+        raise
+
+def _buat_link_sumber(nama_resep: str) -> str:
+    """Buat link Google Search berdasarkan nama resep sebagai referensi sumber"""
+    query = f"resep {nama_resep}"
+    query_encoded = urllib.parse.quote_plus(query)
+    return f"https://www.google.com/search?q={query_encoded}"
 
 
 def node_ekstrak_bahan(state: dict) -> dict:
@@ -76,11 +87,15 @@ def node_cari_resep(state: dict) -> dict:
     except (json.JSONDecodeError, ValueError, AttributeError):
         resep_list = []
 
+    # Tambahkan link sumber ke setiap resep
+    for resep in resep_list:
+        nama = resep.get("nama", "")
+        resep["sumber"] = _buat_link_sumber(nama)
+
     state["resep_list"] = resep_list
     nama_resep = [r.get("nama", "-") for r in resep_list]
     print(f"[NODE 3] Resep ditemukan: {nama_resep}")
     return state
-
 
 def node_generate_langkah(state: dict) -> dict:
     """
