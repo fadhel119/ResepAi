@@ -11,7 +11,22 @@ LangGraph, dan LangSmith.
 Asisten Resep AI adalah aplikasi conversational yang memproses input bahan makanan
 dari pengguna, lalu secara otomatis mengekstrak bahan, mempertimbangkan preferensi
 pengguna, mencari 3 rekomendasi resep, dan menghasilkan langkah memasak lengkap —
-semuanya dijalankan melalui pipeline LangGraph yang terstruktur.
+semuanya dijalankan melalui pipeline LangGraph yang terstruktur dan dipantau penuh
+lewat LangSmith.
+
+Tersedia dalam dua bentuk antarmuka: **web (Streamlit)** dan **CLI (terminal)**.
+
+---
+
+## ✨ Fitur Utama
+
+- **Ekstraksi bahan otomatis** — cukup ketik bahan dalam kalimat bebas (misal "saya punya telur, tomat, sama bawang"), sistem otomatis mengenali daftar bahannya.
+- **Rekomendasi 3 resep sekaligus** — setiap pencarian menghasilkan satu resep utama lengkap dengan langkah memasak, plus 2 alternatif lain yang bisa dipilih.
+- **Preferensi pengguna (memory)** — mode vegetarian dan daftar alergi tersimpan selama sesi berjalan dan otomatis dipertimbangkan di setiap rekomendasi berikutnya.
+- **Riwayat percakapan** — semua interaksi tersimpan di memory dan bisa dilihat kembali kapan saja.
+- **Dua antarmuka pengguna** — versi web interaktif (Streamlit) untuk pengalaman visual, dan versi CLI untuk eksekusi cepat lewat terminal.
+- **Pipeline terstruktur (LangGraph)** — proses dipecah menjadi 4 node yang berjalan berurutan dan dapat dilacak secara independen.
+- **Tracing penuh (LangSmith)** — setiap input, output, durasi, dan token dari tiap node otomatis tercatat untuk keperluan debugging dan evaluasi.
 
 ---
 
@@ -90,22 +105,22 @@ resep-ai/
 | LangChain | Membangun chain prompt + LLM |
 | LangGraph | Mengatur alur pipeline sebagai graph |
 | LangSmith | Tracing dan monitoring eksekusi |
-| Groq API | LLM backend (llama-3.3-70b-versatile) |
+| Groq API | LLM backend (`llama-3.3-70b-versatile`) |
 | Streamlit | Antarmuka web interaktif |
-| Python-dotenv | Manajemen environment variable |
+| python-dotenv | Manajemen environment variable |
 
 ---
 
 ## 🚀 Cara Menjalankan
 
-### 1. Clone Repository
+### 1. Clone repository
 
 ```bash
 git clone https://github.com/username/resep-ai.git
 cd resep-ai
 ```
 
-### 2. Buat Virtual Environment
+### 2. Buat virtual environment
 
 ```bash
 python -m venv venv
@@ -117,13 +132,13 @@ venv\Scripts\activate
 source venv/bin/activate
 ```
 
-### 3. Install Dependensi
+### 3. Install dependensi
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Buat File `.env`
+### 4. Buat file `.env`
 
 Buat file `.env` di root proyek dengan isi berikut:
 
@@ -132,17 +147,27 @@ GROQ_API_KEY=your_groq_api_key_here
 LANGCHAIN_API_KEY=your_langsmith_api_key_here
 ```
 
-> Dapatkan GROQ_API_KEY di: https://console.groq.com
-> Dapatkan LANGCHAIN_API_KEY di: https://smith.langchain.com
+> Dapatkan `GROQ_API_KEY` di: https://console.groq.com
+> Dapatkan `LANGCHAIN_API_KEY` di: https://smith.langchain.com
 
-### 5. Jalankan Aplikasi
+### 5. Jalankan aplikasi
 
-**Antarmuka Web (Streamlit):**
+Pilih salah satu sesuai kebutuhan:
+
+**🌐 Antarmuka web (Streamlit) — direkomendasikan**
+
 ```bash
 streamlit run app.py
+
+
 ```
 
-**Antarmuka CLI:**
+Lalu buka browser ke alamat yang muncul di terminal (biasanya `http://localhost:8501`).
+
+
+
+**💻 Antarmuka CLI (terminal)**
+
 ```bash
 python main.py
 ```
@@ -152,6 +177,7 @@ python main.py
 ## 💬 Cara Penggunaan
 
 ### Web (Streamlit)
+
 1. Buka browser ke `http://localhost:8501`
 2. Centang preferensi (vegetarian, alergi) di sidebar
 3. Masukkan bahan yang tersedia di kolom input
@@ -159,6 +185,7 @@ python main.py
 5. Lihat resep utama beserta alternatifnya
 
 ### CLI
+
 Setelah menjalankan `python main.py`, tersedia perintah berikut:
 
 | Perintah | Fungsi |
@@ -172,6 +199,29 @@ Setelah menjalankan `python main.py`, tersedia perintah berikut:
 
 ---
 
+## 🖼️ Screenshot
+
+> Ganti placeholder di bawah dengan screenshot asli aplikasi kamu sebelum upload ke GitHub.
+
+**Antarmuka Web (Streamlit)**
+
+![Tampilan web Streamlit](screenshots/web-streamlit.png)
+
+![Tampilan Input](Input.png)
+
+![Tampilan Output](Output.png)
+
+**Antarmuka CLI**
+
+![Tampilan CLI terminal](screenshots/cli-terminal.png)
+
+**Dashboard LangSmith (Tracing)**
+
+![Dashboard LangSmith](screenshots/langsmith-trace.png)
+
+---
+
+
 ## 🔍 Monitoring dengan LangSmith
 
 Setiap eksekusi graph otomatis di-trace ke LangSmith. Untuk melihat hasilnya:
@@ -182,10 +232,19 @@ Setiap eksekusi graph otomatis di-trace ke LangSmith. Untuk melihat hasilnya:
 
 ---
 
+## 🛠️ Troubleshooting
+
+| Masalah | Solusi |
+|---|---|
+| `ModuleNotFoundError` saat run | Pastikan virtual environment aktif, lalu jalankan ulang `pip install -r requirements.txt` |
+| Resep tidak muncul / error JSON | Coba ulang dengan bahan yang lebih spesifik; model kadang menghasilkan format yang tidak konsisten |
+| Trace tidak muncul di LangSmith | Pastikan `LANGCHAIN_API_KEY` di `.env` sudah benar dan `LANGCHAIN_TRACING_V2=true` di `config.py` |
+| `streamlit: command not found` | Pastikan virtual environment aktif dan Streamlit sudah terinstall (`pip show streamlit`) |
+
+---
+
 ## 📦 Requirements
 langchain
-
-langchain-openai
 
 langchain-classic
 
@@ -195,17 +254,19 @@ langsmith
 
 python-dotenv
 
-openai
+groq
 
 streamlit
+
+---
 
 ## 👤 Identitas Mahasiswa
 
 | | |
 |---|---|
-| **Nama** | M.Fadhel Khairi Jujut |
-| **Npm** | 233510658 |
-| **Mata Kuliah** | Pemrosesan Bahasa Alami / AI |
+| **Nama** | M. Fadhel Khairi Jujur |
+| **NPM** | 233510658 |
+| **Mata Kuliah** | Pemrosesan Bahasa Alami  |
 | **Universitas** | Universitas Islam Riau |
 
 ---
